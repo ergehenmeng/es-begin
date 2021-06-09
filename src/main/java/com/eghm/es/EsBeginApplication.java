@@ -54,11 +54,7 @@ public class EsBeginApplication {
         SpringApplication.run(EsBeginApplication.class, args);
     }
  
-    @PostMapping("/saveUser")
-    public void saveUser(@RequestBody User user) {
-        elasticsearchRestTemplate.save(user);
-    }
-    
+   
     @GetMapping("/getByNickName")
     public User getByNickName() {
         NativeSearchQuery query = new NativeSearchQueryBuilder().withQuery(QueryBuilders.matchQuery("nickName", "二哥很猛"))
@@ -105,6 +101,46 @@ public class EsBeginApplication {
         return maxYear.getValueAsString();
     }
     
+    
+    
+    @GetMapping("/getUserById")
+    public User getUserById(Long id) {
+        Optional<User> optional = userRepository.findById(id);
+        return optional.orElse(null);
+    }
+    
+    @PostMapping("/saveUser")
+    public String saveUser(@RequestBody User user) {
+        userRepository.save(user);
+        return "SUCCESS";
+    }
+    
+    @GetMapping("/getAllUser")
+    public List<User> getAllUser() {
+        Iterable<User> iterable = userRepository.findAll();
+        List<User> userList = new ArrayList<>();
+        iterable.forEach(userList::add);
+        return userList;
+    }
+    
+    @GetMapping("/deleteIndex")
+    public String deleteIndex() {
+        elasticsearchRestTemplate.indexOps(User.class).delete();
+        return "SUCCESS";
+    }
+    
+    /**
+     * 创建索引
+     */
+    @GetMapping("/createIndex")
+    public String createIndex() {
+        elasticsearchRestTemplate.indexOps(User.class).create();
+        return "SUCCESS";
+    }
+    
+    /**
+     * 添加数据并创建索引
+     */
     @GetMapping("/index")
     public String index() {
         User user = new User();
@@ -112,13 +148,7 @@ public class EsBeginApplication {
         user.setMobile("13123223422");
         user.setId(12L);
         user.setAddTime(new Date());
-        IndexQuery query = new IndexQueryBuilder().withId("id").withObject(user).build();
+        IndexQuery query = new IndexQueryBuilder().withId("12").withObject(user).build();
         return elasticsearchRestTemplate.index(query, IndexCoordinates.of("user"));
-    }
-    
-    @GetMapping("/getUserById")
-    public User getUserById(Long id) {
-        Optional<User> optional = userRepository.findById(id);
-        return optional.orElse(null);
     }
 }
