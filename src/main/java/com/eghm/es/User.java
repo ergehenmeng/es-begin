@@ -1,8 +1,8 @@
 package com.eghm.es;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -25,7 +25,6 @@ public class User implements Serializable {
     
     private String mobile;
     
-    @Field(type = FieldType.Date)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
     private Date addTime;
 }
