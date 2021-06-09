@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- scan:文件改变是否重新加载,scanPeriod文件改变检测间隔:毫秒,debug是否输出内部日志 -->
+<configuration xmlns="http://ch.qos.logback/xml/ns/logback"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://ch.qos.logback/xml/ns/logback http://ch.qos.logback/xml/ns/logback/logback.xsd"
+    scan="true" debug="false" scanPeriod="6000">
+    <!--键值对常量,其他地方可以引用-->
+    <property name="appName" value="es"/>
+    <property name="logPath" value="D:\\logs"/>
+    <!--上下文名称-->
+    <contextName>${appName}</contextName>
+    <!--当前时间戳字符串 其他地方可以引用-->
+    <timestamp key="secondTime" datePattern="yyyyMMddHHmmss" />
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+    
+    <!-- 普通格式输出 %d输出时间,%thread输出线程,%-5level从左到右5个字符整齐输出日志级别 %msg输出日志信息 %n换行符-->
+    <property name="default_log_pattern" value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"/>
+    <!--彩色格式输出-->
+    <property name="color_log_pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} | %yellow(%thread) | %highlight(%-5level) | %cyan(%logger{50}) | %msg%n" />
+    <!--ch.qos.logback.core.ConsoleAppender 负责把日志输出到控制台-->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--%d输出时间,%thread输出线程,%-5level从左到右5个字符整齐输出日志级别 %msg输出日志信息 %n换行符-->
+            <pattern>${color_log_pattern}</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- 每天生成一个文件,保存30天的日志文件 -->
+    <appender name="rolling_info_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logPath}/info.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${default_log_pattern}</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="rolling_error_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logPath}/error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${default_log_pattern}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>error</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    
+    <!-- 出入参日志 -->
+    <appender name="param_rolling_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logPath}/param.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${default_log_pattern}</pattern>
+        </encoder>
+    </appender>
+    
+    <root level="info">
+        <appender-ref ref="rolling_info_file"/>
+        <appender-ref ref="rolling_error_file"/>
+        <appender-ref ref="console"/>
+    </root>
+    
+    <logger name="com.eghm" additivity="false" level="info">
+        <appender-ref ref="console"/>
+        <appender-ref ref="rolling_info_file"/>
+    </logger>
+    
+    <logger name="request_response" level="debug">
+        <appender-ref ref="param_rolling_file"/>
+    </logger>
+    
+    <logger name="jdbc.audit" level="warn"/>
+    <logger name="jdbc.resultset" level="warn"/>
+    <logger name="jdbc.sqltiming" level="warn"/>
+    <logger name="jdbc.connection" level="warn"/>
+    <logger name="org.springframework" level="info"/>
+    <logger name="org.springframework.data.elasticsearch.client.WIRE" level="debug"/>
+    <logger name="org.apache" level="error" />
+
+
+</configuration>

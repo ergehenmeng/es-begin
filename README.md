@@ -1,3 +1,7 @@
+#### es以window服务方式启动
+* `elasticsearch-service.bat install` 安装服务
+* `elasticsearch-service.bat start` 启动服务
+
 ```java
 // 自定义数据转换
 @Configuration

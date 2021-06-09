@@ -7,6 +7,8 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ParsedMax;
 import org.elasticsearch.search.aggregations.metrics.ParsedMin;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +87,7 @@ public class EsBeginApplication {
     public List<Movie> getByPage(Integer page) {
         NativeSearchQuery query = new NativeSearchQueryBuilder().withQuery(QueryBuilders.termQuery("year", 1995))
                 .withPageable(PageRequest.of(page, 20)).build();
+        
         SearchHits<Movie> searchHits = elasticsearchRestTemplate.search(query, Movie.class);
         List<Movie> movieList = new ArrayList<>();
         searchHits.forEach(movieSearchHit -> movieList.add(movieSearchHit.getContent()));
@@ -93,14 +96,19 @@ public class EsBeginApplication {
     
     @GetMapping("/getMax")
     public String getMax(String title) {
-        SearchRequest request = new SearchRequest().source(SearchSourceBuilder.searchSource()
-                .query(QueryBuilders.termQuery("title", title)).aggregation(AggregationBuilders.min("maxYear").field("year")));
+        SearchRequest request = new SearchRequest().source
+                (SearchSourceBuilder.searchSource().query(QueryBuilders.matchQuery("title", title))
+                        .aggregation( AggregationBuilders.max("maxYear").field("year")));
         SearchResponse execute = elasticsearchRestTemplate
                 .execute(client -> client.search(request, RequestOptions.DEFAULT));
-        ParsedMin maxYear = execute.getAggregations().get("maxYear");
+        ParsedMax maxYear = execute.getAggregations().get("maxYear");
         return maxYear.getValueAsString();
     }
     
+    @GetMapping("/getByTitle")
+    public List<Movie> getByTitle(String title) {
+        return movieRepository.getByTitle(title);
+    }
     
     
     @GetMapping("/getUserById")
