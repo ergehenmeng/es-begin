@@ -2,6 +2,10 @@
 * `elasticsearch-service.bat install` 安装服务
 * `elasticsearch-service.bat start` 启动服务
 
+#### 集群说明
+> 建立索引和类型时通过master,之后同步给slave
+> 数据写入时,根据一定的routing规则,将route到集群任意节点,因此写入压力分散到整个集群中
+
 ```java
 // 自定义数据转换
 @Configuration
