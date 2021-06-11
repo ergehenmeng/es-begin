@@ -6,6 +6,12 @@
 > 建立索引和类型时通过master,之后同步给slave
 > 数据写入时,根据一定的routing规则,将route到集群任意节点,因此写入压力分散到整个集群中
 
+#### Analyzer组成部分
+> 0或多个character filter + 1个tokenizer + 0或多个token filter组成
+* character filter 字符过滤
+* tokenizer 文本切为分词
+* token filter 分词之后进行过滤
+
 ```java
 // 自定义数据转换
 @Configuration
